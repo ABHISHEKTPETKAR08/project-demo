@@ -11,12 +11,18 @@ pool:
 
 steps:
 - task: Maven@4
+- task: JavaToolInstaller@0
+  displayName: 'Set up JDK 21'
+  inputs:
+    versionSpec: '21'
+    jdkArchitectureOption: 'x64'
+    jdkSourceOption: 'PreInstalled'
+- task: Maven@4
+  displayName: 'Build with Maven'
   inputs:
     mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
+    goals: 'clean package'
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'package'
+
+ 
