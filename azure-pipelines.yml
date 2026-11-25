@@ -7,34 +7,37 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
+jobs:
+- job: BuildMaven
+  displayName: 'Build Maven'
 
-# Step 1: Configure Java 21 FIRST
-- task: JavaToolInstaller@0
-  displayName: 'Set up JDK 21'
-  inputs:
-    versionSpec: '21'
-    jdkArchitectureOption: 'x64'
-    jdkSourceOption: 'PreInstalled'
+  steps:
 
-# Step 2: Verify Java version
-- script: |
-    java -version
-    javac -version
-    mvn -version
-  displayName: 'Verify Java 21'
+  # Step 1: Configure Java 21
+  - task: JavaToolInstaller@0
+    displayName: 'Set up JDK 21'
+    inputs:
+      versionSpec: '21'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
 
-# Step 3: Verify source code from GitHub
-- script: |
-    echo "Current branch:"
-    git branch --show-current
+  # Step 2: Verify Java version
+  - script: |
+      java -version
+      javac -version
+      mvn -version
+    displayName: 'Verify Java 21'
 
-    echo "Latest commit:"
-    git log -1 --oneline
+  # Step 3: Verify source code
+  - script: |
+      cat src/main/java/org/example/Main.java
+    displayName: 'Verify GitHub source code'
 
-    echo "Main.java contents:"
-    cat src/main/java/org/example/Main.java
-
-    echo "Searching for IO references:"
-    grep -n "IO" src/main/java/org/example/Main.java || true
-  displayName: 'Verify GitHub source code'
+  # Step 4: Build using Maven
+  - task: Maven@4
+    displayName: 'Maven Build'
+    inputs:
+      mavenPomFile: 'pom.xml'
+      goals: 'clean package'
+      publishJUnitResults: true
+      testResultsFiles: '**/surefire-reports/TEST-*.xml'
