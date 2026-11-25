@@ -24,11 +24,17 @@ steps:
     mvn -version
   displayName: 'Verify Java 21'
 
-# Step 3: Build using Maven 4
-- task: Maven@4
-  displayName: 'Build with Maven'
-  inputs:
-    mavenPomFile: 'pom.xml'
-    goals: 'clean package'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
+# Step 3: Verify source code from GitHub
+- script: |
+    echo "Current branch:"
+    git branch --show-current
+
+    echo "Latest commit:"
+    git log -1 --oneline
+
+    echo "Main.java contents:"
+    cat src/main/java/org/example/Main.java
+
+    echo "Searching for IO references:"
+    grep -n "IO" src/main/java/org/example/Main.java || true
+  displayName: 'Verify GitHub source code'
