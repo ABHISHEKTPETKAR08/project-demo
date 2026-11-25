@@ -1,22 +1,30 @@
-# Maven
-# Build your Java project and run tests with Apache Maven.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+# Maven build pipeline
 
 trigger:
 - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'
 
 steps:
-- task: Maven@4
+
+# Step 1: Configure Java 21 FIRST
 - task: JavaToolInstaller@0
   displayName: 'Set up JDK 21'
   inputs:
     versionSpec: '21'
     jdkArchitectureOption: 'x64'
     jdkSourceOption: 'PreInstalled'
+
+# Step 2: Verify Java version
+- script: |
+    java -version
+    javac -version
+    mvn -version
+  displayName: 'Verify Java 21'
+
+# Step 3: Build using Maven 4
 - task: Maven@4
   displayName: 'Build with Maven'
   inputs:
@@ -24,5 +32,3 @@ steps:
     goals: 'clean package'
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-
- 
